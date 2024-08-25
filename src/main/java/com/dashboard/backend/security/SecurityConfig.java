@@ -52,7 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/hello").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/hello").permitAll()
+//                                .requestMatchers(HttpMethod.GET, "/**").authenticated()
 
 //                        .requestMatchers(HttpMethod.POST, "/roles").permitAll()
 //                       .requestMatchers("/**").authenticated()      <- hier de admin pagina's

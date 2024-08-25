@@ -7,5 +7,6 @@ public class UserDto {
     public String fName;
     public String lName;
     public String password;
+    public String artistName;
     public List<String> roleName;
 }

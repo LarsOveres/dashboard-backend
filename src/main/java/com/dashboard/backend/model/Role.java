@@ -10,23 +10,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 45, unique = true)
     private String roleName;
 
-    public Role() {
-
-    }
+    public Role() {}
 
     public Role(String roleName) {
-        this.roleName = roleName;
-    }
-
-    public Role(Long id) {
-        this.id = id;
-    }
-
-    public Role(Long id, String roleName) {
-        this.id = id;
         this.roleName = roleName;
     }
 
@@ -44,5 +32,9 @@ public class Role {
 
     public void setRoleName(String roleName) {
         this.roleName = roleName;
+    }
+
+    public boolean isEmpty() {
+        return roleName.isEmpty();
     }
 }

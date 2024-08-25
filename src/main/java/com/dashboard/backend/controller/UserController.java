@@ -1,52 +1,71 @@
 package com.dashboard.backend.controller;
 
 import com.dashboard.backend.dto.UserDto;
-import com.dashboard.backend.model.Role;
 import com.dashboard.backend.model.User;
 import com.dashboard.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:5173/")
 @RestController
+@RequestMapping("/users")
 public class UserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
-
-
+    // Endpoint voor registratie van een gebruiker
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody User user) {
         try {
-            String response = userService.createUser(userDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            userService.createUser(user);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse("User created successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(e.getMessage()));
         }
     }
 
-    @GetMapping("/allusers")
-    public List<UserDto> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return users.stream()
-                .map(user -> {
-                    UserDto userDto = new UserDto();
-                    userDto.email = user.getEmail();
-                    userDto.fName = user.getfName();
-                    userDto.lName = user.getlName();
-                    userDto.password = user.getPassword();
-                    userDto.roleName = user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList());
-                    return userDto;
-
-                })
-                .collect(Collectors.toList());
+    // Endpoint voor het toewijzen van de admin-rol
+    @PostMapping("/{id}/assign-admin")
+    public ResponseEntity<?> assignAdminRole(@PathVariable Long id) {
+        String result = userService.assignAdminRole(id);
+        return ResponseEntity.ok().body(new ApiResponse(result));
     }
 
+    // Klasse voor JSON respons
+    public static class ApiResponse {
+        private String message;
+
+        public ApiResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
+        return user.map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
 
 }
 
