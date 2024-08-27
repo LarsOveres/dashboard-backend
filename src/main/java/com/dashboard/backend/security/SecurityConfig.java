@@ -15,6 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -52,13 +57,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/hello").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/users/**").authenticated()
+                                .requestMatchers("/**").authenticated()
 //                                .requestMatchers(HttpMethod.GET, "/**").authenticated()
 
 //                        .requestMatchers(HttpMethod.POST, "/roles").permitAll()
 //                       .requestMatchers("/**").authenticated()      <- hier de admin pagina's
 //                        .requestMatchers("/**").authenticated()
-                                .requestMatchers("/**").permitAll()
 
 //                        .requestMatchers(HttpMethod.POST, "/auth").permitAll()
 //                        .requestMatchers("/secret").hasRole("ADMIN")
@@ -68,8 +73,10 @@ public class SecurityConfig {
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
-                .addFilterBefore(new com.dashboard.backend.security.JwtRequestFilter(jwtService, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
+//                .cors(cors -> cors.disable())
+                .addFilterBefore(new JwtRequestFilter(jwtService, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
+

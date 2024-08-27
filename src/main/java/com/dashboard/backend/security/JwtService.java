@@ -3,7 +3,6 @@ package com.dashboard.backend.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,22 +43,31 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+//    private Claims extractAllClaims(String token) {
+//        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+//    }
+
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not extract claims from JWT", e);
+        }
     }
 
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails, Long userId) {
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", userDetails.getUsername());
-        return createToken(claims, userId.toString());
+        return createToken(claims, userDetails.getUsername());
     }
-    private String createToken(Map<String, Object> claims, String
+
+    public String createToken(Map<String, Object> claims, String
             subject) {
-        long validPeriod = 1000 * 60 * 5; // * 60 * 24;  // 1 days in ms
+        long validPeriod = 1000 * 60 * 60; // * 60 * 24;  // 1 days in ms
         long currentTime = System.currentTimeMillis();
         return Jwts.builder()
                 .setClaims(claims)
