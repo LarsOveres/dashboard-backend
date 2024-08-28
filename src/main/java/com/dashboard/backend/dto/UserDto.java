@@ -44,4 +44,12 @@ public class UserDto {
     public void setArtistName(String artistName) {
         this.artistName = artistName;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

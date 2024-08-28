@@ -15,30 +15,33 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final com.dashboard.backend.security.JwtService jwtService;
+    private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    public SecurityConfig(com.dashboard.backend.security.JwtService service, UserRepository userRepos) {
+    public SecurityConfig(JwtService service, UserRepository userRepos) {
         this.jwtService = service;
         this.userRepository = userRepos;
     }
 
+//    @Bean
+//    public AuthenticationManager authenticationManager(UserDetailsService udService, PasswordEncoder passwordEncoder) {
+//        var auth = new DaoAuthenticationProvider();
+//        auth.setPasswordEncoder(passwordEncoder);
+//        auth.setUserDetailsService(udService);
+//        return new ProviderManager(auth);
+//    }
+
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService udService, PasswordEncoder passwordEncoder) {
-        var auth = new DaoAuthenticationProvider();
-        auth.setPasswordEncoder(passwordEncoder);
-        auth.setUserDetailsService(udService);
-        return new ProviderManager(auth);
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(authProvider);
     }
 
     @Bean
@@ -48,7 +51,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new com.dashboard.backend.security.MyUserDetailService(this.userRepository);
+        return new MyUserDetailService(userRepository);
     }
 
     @Bean
@@ -57,23 +60,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/users/**").authenticated()
-                                .requestMatchers("/**").authenticated()
-//                                .requestMatchers(HttpMethod.GET, "/**").authenticated()
-
-//                        .requestMatchers(HttpMethod.POST, "/roles").permitAll()
-//                       .requestMatchers("/**").authenticated()      <- hier de admin pagina's
-//                        .requestMatchers("/**").authenticated()
-
-//                        .requestMatchers(HttpMethod.POST, "/auth").permitAll()
-//                        .requestMatchers("/secret").hasRole("ADMIN")
-//                        .requestMatchers("/hello").authenticated()
-//                        .requestMatchers("/profiles", "/profiles/*").authenticated()
-//                        .anyRequest().denyAll()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
-//                .cors(cors -> cors.disable())
                 .addFilterBefore(new JwtRequestFilter(jwtService, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
