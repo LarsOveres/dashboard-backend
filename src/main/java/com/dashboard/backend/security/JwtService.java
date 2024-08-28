@@ -1,10 +1,12 @@
 package com.dashboard.backend.security;
 
+import com.dashboard.backend.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +19,42 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final static String SECRET_KEY = "YOUR_BASE64_ENCODED_SECRET";
+    private Key secretKey;
+
+    @PostConstruct
+    public void init() {
+        // Genereer een HMAC SHA-256 sleutel
+        secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);  // Maakt een sleutel aan met een standaard lengte voor HS256
+    }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return secretKey;
     }
+
+    public String generateToken(UserDetails userDetails) {
+        return createToken(new HashMap<>(), userDetails.getUsername());
+    }
+
+    public String createToken(Map<String, Object> claims, String
+            subject) {
+        long validPeriod = 1000 * 60 * 60; // * 60 * 24;  // 1 days in ms
+        long currentTime = System.currentTimeMillis();
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(currentTime))
+                .setExpiration(new Date(currentTime + validPeriod))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public Boolean validateToken(String token, UserDetails
+            userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) &&
+                !isTokenExpired(token);
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -45,27 +77,29 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
-    }
-    private String createToken(Map<String, Object> claims, String
-            subject) {
-        long validPeriod = 1000 * 60 * 24 * 10;  // 10 days in ms
-        long currentTime = System.currentTimeMillis();
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(currentTime))
-                .setExpiration(new Date(currentTime + validPeriod))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+//    private Claims extractAllClaims(String token) {
+//        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+//    }
 
-    public Boolean validateToken(String token, UserDetails
-            userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) &&
-                !isTokenExpired(token);
-    }
+//    private Claims extractAllClaims(String token) {
+//        try {
+//            return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+//        } catch (Exception e) {
+//            throw new RuntimeException("Could not extract claims from JWT", e);
+//        }
+//    }
+
+
+
+//    public String generateToken(UserDetails userDetails) {
+//        Map<String, Object> claims = new HashMap<>();
+//        claims.put("email", userDetails.getUsername());
+//        return createToken(claims, userDetails.getUsername());
+//    }
+
+
+
+
+
+
 }
