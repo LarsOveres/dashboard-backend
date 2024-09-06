@@ -23,12 +23,6 @@ public class User {
     @Column(nullable = false, length = 64)
     private String password;
 
-    @Column(length = 32)
-    private String fName;
-
-    @Column(length = 32)
-    private String lName;
-
     @Column(nullable = false, length = 32)
     private String artistName;
 
@@ -72,22 +66,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getfName() {
-        return fName;
-    }
-
-    public void setfName(String fName) {
-        this.fName = fName;
-    }
-
-    public String getlName() {
-        return lName;
-    }
-
-    public void setlName(String lName) {
-        this.lName = lName;
     }
 
     public String getArtistName() {

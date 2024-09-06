@@ -28,14 +28,6 @@ public class SecurityConfig {
         this.userRepository = userRepos;
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(UserDetailsService udService, PasswordEncoder passwordEncoder) {
-//        var auth = new DaoAuthenticationProvider();
-//        auth.setPasswordEncoder(passwordEncoder);
-//        auth.setUserDetailsService(udService);
-//        return new ProviderManager(auth);
-//    }
-
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -60,6 +52,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/files/upload").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

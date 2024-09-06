@@ -16,12 +16,11 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Controleer of de rol 'USER' al bestaat
+
         if (roleRepository.findByRoleName("USER").isEmpty()) {
             roleRepository.save(new Role("USER"));
         }
 
-        // Controleer of de rol 'ADMIN' al bestaat
         if (roleRepository.findByRoleName("ADMIN").isEmpty()) {
             roleRepository.save(new Role("ADMIN"));
         }

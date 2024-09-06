@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173/")
+//@CrossOrigin(origins = "http://localhost:5173/")
 public class AuthController {
 
     private final AuthenticationManager authManager;
@@ -43,7 +43,6 @@ public class AuthController {
         try {
             Authentication authentication = authManager.authenticate(authenticationToken);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-//            User user = userService.findByEmail(userDetails.getUsername());
             String token = jwtService.generateToken(userDetails);
 
             AuthResponse authResponse = new AuthResponse(token, userDetails.getUsername());
@@ -63,12 +62,6 @@ public class AuthController {
             user.setEmail(userDto.getEmail());
             user.setArtistName(userDto.getArtistName());
             user.setPassword(userDto.getPassword());
-//            if (userDto.getPassword() == null || userDto.getPassword().isEmpty()) {
-//                throw new IllegalArgumentException("Password cannot be null or empty");
-//            }
-
-//            String encodedPassword = passwordEncoder.encode(userDto.getPassword());
-//            user.setPassword(encodedPassword);
 
             userService.createUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
@@ -79,9 +72,10 @@ public class AuthController {
 
     @GetMapping("/users/{email}")
     public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
+        System.out.println("Opgehaald email: " + email);  // Log het emailadres
         return userService.getUserByEmail(email)
                 .map(user -> new ResponseEntity<>(
-                        new UserDto(user.getEmail()),
+                        new UserDto(user.getId(), user.getEmail(), user.getArtistName()),
                         HttpStatus.OK))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
@@ -91,51 +85,6 @@ public class AuthController {
         String result = userService.assignAdminRole(id);
         return ResponseEntity.ok().body(result);
     }
-
-
-//    @GetMapping("/users/{id}")
-//    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-//        Optional<User> user = userService.getUserById(id);
-//        if (user.isPresent()) {
-//            UserDto userDto = new UserDto(user.get().getId(), user.get().getEmail(), user.get().getArtistName());
-//            return ResponseEntity.ok(userDto);
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        }
-//    }
-
-//    @GetMapping("/users/{id}")
-//    public UserDto getUserById(@PathVariable Long id) {
-//        return userService.getUserById(id)
-//                .map(user -> new UserDto(user.getId(), user.getEmail(), user.getArtistName()))
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-//    }
-
-    //    @GetMapping("/users/{id}")
-//    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-//        return userService.getUserById(id)
-//                .map(user -> new ResponseEntity<>(
-//                        new UserDto(user.getId(), user.getEmail(), user.getArtistName()),
-//                        HttpStatus.OK))
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-//    }
-
-
-//    @PostMapping("/register")
-//    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
-//        try {
-//            String response = userService.createUser(userDto);
-//            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-//        }
-//    }
-
-//    @DeleteMapping("/users/{id}")
-//    public String deleteUser(@PathVariable Long id) {
-//        userService.deleteUserById(id);
-//        return "User deleted";
-//    }
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -150,5 +99,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
-
 }

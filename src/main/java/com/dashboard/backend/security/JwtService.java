@@ -1,12 +1,11 @@
 package com.dashboard.backend.security;
 
-import com.dashboard.backend.model.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +22,7 @@ public class JwtService {
 
     @PostConstruct
     public void init() {
-        // Genereer een HMAC SHA-256 sleutel
-        secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);  // Maakt een sleutel aan met een standaard lengte voor HS256
+        secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
     private Key getSigningKey() {
@@ -37,7 +35,7 @@ public class JwtService {
 
     public String createToken(Map<String, Object> claims, String
             subject) {
-        long validPeriod = 1000 * 60 * 60; // * 60 * 24;  // 1 days in ms
+        long validPeriod = 1000 * 10 * 60;
         long currentTime = System.currentTimeMillis();
         return Jwts.builder()
                 .setClaims(claims)
@@ -50,6 +48,7 @@ public class JwtService {
 
     public Boolean validateToken(String token, UserDetails
             userDetails) {
+        System.out.println("ontvangen token: " + token);
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) &&
                 !isTokenExpired(token);
@@ -69,37 +68,25 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+//    private Claims extractAllClaims(String token) {
+//        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+//    }
+
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException | IllegalArgumentException e) {
+            // Log de uitzondering en/of gooi een aangepaste foutmelding
+
+            throw new RuntimeException("Invalid JWT token");
+        }
     }
 
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-
-//    private Claims extractAllClaims(String token) {
-//        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
-//    }
-
-//    private Claims extractAllClaims(String token) {
-//        try {
-//            return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Could not extract claims from JWT", e);
-//        }
-//    }
-
-
-
-//    public String generateToken(UserDetails userDetails) {
-//        Map<String, Object> claims = new HashMap<>();
-//        claims.put("email", userDetails.getUsername());
-//        return createToken(claims, userDetails.getUsername());
-//    }
-
-
-
-
-
-
 }
