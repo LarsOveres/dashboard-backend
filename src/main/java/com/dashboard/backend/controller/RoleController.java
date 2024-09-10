@@ -1,7 +1,6 @@
 package com.dashboard.backend.controller;
 
 import com.dashboard.backend.model.Role;
-import com.dashboard.backend.repository.RoleRepository;
 import com.dashboard.backend.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,8 +16,8 @@ import java.util.Map;
 @RequestMapping("/roles")
 public class RoleController {
 
-    @Autowired
-    private RoleRepository roleRepository;
+//    @Autowired
+//    private RoleRepository roleRepository;
     @Autowired
     private RoleService roleService;
 

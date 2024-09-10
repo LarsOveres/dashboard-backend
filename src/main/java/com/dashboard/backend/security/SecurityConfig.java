@@ -28,14 +28,6 @@ public class SecurityConfig {
         this.userRepository = userRepos;
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(UserDetailsService udService, PasswordEncoder passwordEncoder) {
-//        var auth = new DaoAuthenticationProvider();
-//        auth.setPasswordEncoder(passwordEncoder);
-//        auth.setUserDetailsService(udService);
-//        return new ProviderManager(auth);
-//    }
-
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

@@ -5,11 +5,9 @@ import java.util.List;
 public class UserDto {
     public Long id;
     public String email;
-    public String fName;
-    public String lName;
     public String password;
     public String artistName;
-    public List<String> roleName;
+//    public List<String> roleName;
 
     public UserDto(Long id, String email, String artistName) {
         this.id = id;
