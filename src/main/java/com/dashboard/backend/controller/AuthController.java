@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-//@CrossOrigin(origins = "http://localhost:5173/")
 public class AuthController {
 
     private final AuthenticationManager authManager;
@@ -46,27 +45,11 @@ public class AuthController {
             String token = jwtService.generateToken(userDetails);
 
             AuthResponse authResponse = new AuthResponse(token, userDetails.getUsername());
-
             return ResponseEntity.ok()
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .body(authResponse);
         } catch (AuthenticationException ex) {
             return new ResponseEntity<>(new AuthResponse("Bad credentials"), HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
-        try {
-            User user = new User();
-            user.setEmail(userDto.getEmail());
-            user.setArtistName(userDto.getArtistName());
-            user.setPassword(userDto.getPassword());
-
-            userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -78,12 +61,6 @@ public class AuthController {
                         new UserDto(user.getId(), user.getEmail(), user.getArtistName()),
                         HttpStatus.OK))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    }
-
-    @PostMapping("/{id}/assign-admin")
-    public ResponseEntity<?> assignAdminRole(@PathVariable Long id) {
-        String result = userService.assignAdminRole(id);
-        return ResponseEntity.ok().body(result);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);

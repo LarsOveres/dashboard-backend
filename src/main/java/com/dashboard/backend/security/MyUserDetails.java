@@ -17,15 +17,19 @@ public class MyUserDetails implements UserDetails {
     public MyUserDetails(User user) {
         this.user = user;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
+        Role role = user.getRole(); // Role is now ManyToOne
 
-        for (Role role : user.getRoles()) {
+        if (role != null) {
             authorities.add(new SimpleGrantedAuthority(role.getRoleName()));
         }
+
         return authorities;
     }
+
     @Override
     public String getPassword() {
         return user.getPassword();

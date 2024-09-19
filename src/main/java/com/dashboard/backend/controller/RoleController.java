@@ -1,25 +1,27 @@
 package com.dashboard.backend.controller;
 
 import com.dashboard.backend.model.Role;
+import com.dashboard.backend.model.User;
 import com.dashboard.backend.service.RoleService;
+import com.dashboard.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/roles")
 public class RoleController {
 
-//    @Autowired
-//    private RoleRepository roleRepository;
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/add")
     public ResponseEntity<Role> addRole(@RequestBody Map<String, String> roleData) {
@@ -32,4 +34,28 @@ public class RoleController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
+    // Voeg een endpoint toe om de rol van een gebruiker bij te werken
+    @PutMapping("/user/{userId}/role")
+    public ResponseEntity<User> updateUserRole(@PathVariable Long userId,
+                                               @RequestParam String newRoleName) {
+        try {
+            User updatedUser = userService.updateUserRole(userId, newRoleName);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/user/role")
+    public ResponseEntity<Map<String, String>> getUserRole(Principal principal) {
+        User user = userService.getUserByEmail(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Gebruiker niet gevonden"));
+
+        Map<String, String> response = new HashMap<>();
+        response.put("roleName", user.getRole().getRoleName());
+
+        return ResponseEntity.ok(response);
+    }
+
 }

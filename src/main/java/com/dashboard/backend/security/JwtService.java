@@ -18,19 +18,25 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private Key secretKey;
+    private static Key secretKey;
 
     @PostConstruct
     public void init() {
         secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    private Key getSigningKey() {
+    private static Key getSigningKey() {
         return secretKey;
     }
 
+//    public String generateToken(UserDetails userDetails) {
+//        return createToken(new HashMap<>(), userDetails.getUsername());
+//    }
+
     public String generateToken(UserDetails userDetails) {
-        return createToken(new HashMap<>(), userDetails.getUsername());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userDetails.getUsername()); // Je kunt ook een andere identifier gebruiken
+        return createToken(claims, userDetails.getUsername());
     }
 
     public String createToken(Map<String, Object> claims, String
@@ -62,7 +68,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T>
+    private static <T> T extractClaim(String token, Function<Claims, T>
             claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -72,7 +78,7 @@ public class JwtService {
 //        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
 //    }
 
-    private Claims extractAllClaims(String token) {
+    private static Claims extractAllClaims(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
@@ -84,6 +90,9 @@ public class JwtService {
 
             throw new RuntimeException("Invalid JWT token");
         }
+    }
+    public static Long extractUserId(String token) {
+        return Long.parseLong(extractClaim(token, claims -> claims.get("userId", String.class)));
     }
 
     private Boolean isTokenExpired(String token) {

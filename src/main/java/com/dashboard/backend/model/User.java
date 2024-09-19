@@ -1,13 +1,11 @@
 package com.dashboard.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -17,47 +15,35 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 64)
-    private String email;
-
-    @Column(nullable = false, length = 64)
     private String password;
-
-    @Column(nullable = false, length = 32)
     private String artistName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<com.dashboard.backend.model.Role> roles;
+    @Column(unique = true, nullable = false)
+    private String email;
 
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
-                .collect(Collectors.toList());
-    }
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    @JsonIgnore
+    private Role role;
 
+    // Constructors
     public User() {
-        this.roles = new HashSet<>(); // Zorg ervoor dat de Set altijd is geïnitialiseerd
     }
 
+    public User(String password, String artistName, String email, Role role) {
+        this.password = password;
+        this.artistName = artistName;
+        this.email = email;
+        this.role = role;
+    }
+
+    // Getters en setters
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {
@@ -76,15 +62,19 @@ public class User {
         this.artistName = artistName;
     }
 
-    public Set<com.dashboard.backend.model.Role> getRoles() {
-        return roles;
+    public String getEmail() {
+        return email;
     }
 
-    public void setRoles(Set<com.dashboard.backend.model.Role> roles) {
-        this.roles = roles;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void addRole(com.dashboard.backend.model.Role role) {
-        this.roles.add(role);
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }
