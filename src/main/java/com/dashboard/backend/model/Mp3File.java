@@ -1,5 +1,7 @@
 package com.dashboard.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,9 +16,13 @@ public class Mp3File {
     private String filePath;
     private String fileType;
     private Long fileSize;
+    private Long duration;
+    private int playCount;
+    private int downloadCount;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     public Long getId() {
@@ -65,5 +71,41 @@ public class Mp3File {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getArtistName() {
+        return user.getArtistName();
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public int getPlayCount() {
+        return playCount;
+    }
+
+    public void setPlayCount(int playCount) {
+        this.playCount = playCount;
+    }
+
+    public void incrementPlayCount() {
+        this.playCount++;
+    }
+
+    public int getDownloadCount() {
+        return downloadCount;
+    }
+
+    public void setDownloadCount(int downloadCount) {
+        this.downloadCount = downloadCount;
+    }
+
+    public void incrementDownloadCount() {
+        this.downloadCount++;
     }
 }
