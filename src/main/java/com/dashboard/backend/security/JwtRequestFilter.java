@@ -19,8 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -50,7 +48,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (jwtService.validateToken(jwtToken, userDetails)) {
-                // Extract authorities from the token
+
                 Collection<SimpleGrantedAuthority> authorities = jwtService.extractAuthorities(jwtToken);
 
                 UsernamePasswordAuthenticationToken authToken =
