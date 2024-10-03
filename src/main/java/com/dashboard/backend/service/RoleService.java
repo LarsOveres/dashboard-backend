@@ -19,11 +19,6 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
-//    public Role getRoleByName(String roleName) {
-//        return roleRepository.findByRoleName(roleName)
-//                .orElseThrow(() -> new RuntimeException("Role " + roleName + " not found"));
-//    }
-
     public Role addRole(String roleName) {
         Role role = new Role();
         role.setRoleName(roleName);

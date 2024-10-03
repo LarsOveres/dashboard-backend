@@ -5,7 +5,6 @@ import com.dashboard.backend.dto.Mp3FileDto;
 import com.dashboard.backend.model.Mp3File;
 import com.dashboard.backend.model.User;
 
-import com.dashboard.backend.repository.Mp3FileRepository;
 import com.dashboard.backend.service.Mp3FileService;
 import com.dashboard.backend.service.UserService;
 
@@ -17,8 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,13 +32,11 @@ public class Mp3FileController {
     @Autowired
     private final Mp3FileService mp3FileService;
     private final UserService userService;
-    private final Mp3FileRepository mp3FileRepository;
 
     @Autowired
-    public Mp3FileController(Mp3FileService mp3FileService, UserService userService, Mp3FileRepository mp3FileRepository) {
+    public Mp3FileController(Mp3FileService mp3FileService, UserService userService) {
         this.mp3FileService = mp3FileService;
         this.userService = userService;
-        this.mp3FileRepository = mp3FileRepository;
     }
 
     @PostMapping("/upload")
@@ -52,7 +47,6 @@ public class Mp3FileController {
             @RequestParam("size") Long size,
             Principal principal) {
 
-        // Haal de ingelogde gebruiker op via de Principal
         Optional<User> currentUserOpt = userService.getUserByEmail(principal.getName());
         if (currentUserOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -61,7 +55,7 @@ public class Mp3FileController {
         User currentUser = currentUserOpt.get();
 
         try {
-            Mp3FileDto savedFile = mp3FileService.saveFile(file, name, type, size, currentUser); // Geef de gebruiker door
+            Mp3FileDto savedFile = mp3FileService.saveFile(file, name, type, size, currentUser);
             return ResponseEntity.ok(savedFile);
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,18 +63,16 @@ public class Mp3FileController {
         }
     }
 
-
     @GetMapping("/list")
     public ResponseEntity<List<Mp3FileDto>> listFiles(Principal principal) {
-        // Haal de ingelogde gebruiker op via de Principal en controleer of deze bestaat
         Optional<User> currentUserOpt = userService.getUserByEmail(principal.getName());
         if (currentUserOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Returneer 404 als de gebruiker niet wordt gevonden
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        User currentUser = currentUserOpt.get(); // "Unwrap" de gebruiker uit het Optional
+        User currentUser = currentUserOpt.get();
 
-        List<Mp3FileDto> files = mp3FileService.getAllFiles(currentUser); // Geef de ingelogde gebruiker door
+        List<Mp3FileDto> files = mp3FileService.getAllFiles(currentUser);
         return ResponseEntity.ok(files);
     }
 
@@ -142,18 +134,14 @@ public class Mp3FileController {
 
     @GetMapping("/user-files/download-stats")
     public ResponseEntity<Map<String, Object>> getUserDownloadStats(Principal principal) {
-        // Haal de ingelogde gebruiker op via de principal
         User user = userService.findByEmail(principal.getName());
 
-        // Haal alle MP3-bestanden van de gebruiker op
         List<Mp3File> userFiles = mp3FileService.getFilesByUser(user.getId());
 
-        // Bereken het totaal aantal downloads
         int totalDownloads = userFiles.stream()
                 .mapToInt(Mp3File::getDownloadCount)
                 .sum();
 
-        // Bereid de response voor
         Map<String, Object> response = new HashMap<>();
         response.put("totalDownloads", totalDownloads);
         response.put("totalFiles", userFiles.size());

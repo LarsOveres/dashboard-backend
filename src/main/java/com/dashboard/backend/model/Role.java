@@ -16,17 +16,15 @@ public class Role {
 
     @OneToMany(mappedBy = "role")
     @JsonIgnore
-    private List<User> users; // One Role can be associated with many Users
+    private List<User> users;
 
     public Role() {
     }
 
-    // Constructor met argumenten
     public Role(String roleName) {
         this.roleName = roleName;
     }
 
-    // Getters en setters
     public Long getId() {
         return id;
     }

@@ -6,14 +6,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
+
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -25,17 +27,16 @@ public class JwtService {
         secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    private static Key getSigningKey() {
+    static Key getSigningKey() {
         return secretKey;
     }
 
-//    public String generateToken(UserDetails userDetails) {
-//        return createToken(new HashMap<>(), userDetails.getUsername());
-//    }
-
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userDetails.getUsername()); // Je kunt ook een andere identifier gebruiken
+        claims.put("userId", userDetails.getUsername());
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
         return createToken(claims, userDetails.getUsername());
     }
 
@@ -74,10 +75,6 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-//    private Claims extractAllClaims(String token) {
-//        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
-//    }
-
     private static Claims extractAllClaims(String token) {
         try {
             return Jwts.parserBuilder()
@@ -86,13 +83,18 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException | IllegalArgumentException e) {
-            // Log de uitzondering en/of gooi een aangepaste foutmelding
 
             throw new RuntimeException("Invalid JWT token");
         }
     }
-    public static Long extractUserId(String token) {
-        return Long.parseLong(extractClaim(token, claims -> claims.get("userId", String.class)));
+
+    public Collection<SimpleGrantedAuthority> extractAuthorities(String token) {
+        Claims claims = extractAllClaims(token);
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
     private Boolean isTokenExpired(String token) {

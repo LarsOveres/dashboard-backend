@@ -28,10 +28,7 @@ public class Mp3FileDto {
     }
 
     public Mp3FileDto() {
-
     }
-
-
 
     public String getFileName() {
         return fileName;

@@ -15,7 +15,6 @@ public class Mp3DurationUtil {
             Map<String, Object> properties = fileFormat.properties();
             Long duration = (Long) properties.get("duration");
 
-            // Converteer duur naar seconden (duurtijd wordt in microseconden gegeven)
             return duration / 1_000_000;
         } catch (UnsupportedAudioFileException | IOException e) {
             throw new IOException("Kan de MP3 duur niet bepalen: " + e.getMessage());

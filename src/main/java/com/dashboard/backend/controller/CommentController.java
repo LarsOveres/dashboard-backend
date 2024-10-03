@@ -22,27 +22,60 @@ public class CommentController {
     @Autowired
     private UserService userService;
 
+//    @PostMapping("/{id}/comment")
+//    public ResponseEntity<CommentDto> addComment(@PathVariable Long id,
+//                                                 @RequestBody CommentDto commentDto,
+//                                                 Principal principal) {
+//        User user = userService.getUserByEmail(principal.getName())
+//                .orElseThrow(() -> new IllegalArgumentException("Gebruiker niet gevonden"));
+//
+//        // Controleer of de gebruiker admin is
+//        if (!user.getRole().getRoleName().equals("ADMIN")) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//
+//        // Controleer of de comment minimaal 1 karakter bevat
+//        if (commentDto.getContent() == null || commentDto.getContent().trim().isEmpty()) {
+//            CommentDto errorComment = new CommentDto();
+//            errorComment.setContent("Comment moet minimaal 1 karakter bevatten");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorComment);
+//        }
+//
+//        CommentDto addedComment = commentService.addComment(id, commentDto.getContent(), user);
+//        return ResponseEntity.ok(addedComment);
+//    }
 
-    // Admins kunnen comments plaatsen
     @PostMapping("/{id}/comment")
     public ResponseEntity<CommentDto> addComment(@PathVariable Long id,
                                                  @RequestBody CommentDto commentDto,
                                                  Principal principal) {
-        // Haal de ingelogde gebruiker op via de Principal
-        User user = userService.getUserByEmail(principal.getName())
-                .orElseThrow(() -> new IllegalArgumentException("Gebruiker niet gevonden"));
+        try {
+            User user = userService.getUserByEmail(principal.getName())
+                    .orElseThrow(() -> new IllegalArgumentException("Gebruiker niet gevonden"));
 
-        // Controleer of de gebruiker een admin is
-        if (!user.getRole().getRoleName().equals("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Alleen admins mogen comments plaatsen
+            // Voeg een log toe om de rol van de gebruiker te controleren
+            System.out.println("Rol van gebruiker: " + user.getRole().getRoleName());
+
+            // Controleer of de gebruiker admin is
+            if (!user.getRole().getRoleName().equals("ROLE_ADMIN")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            // Controleer of de comment minimaal 1 karakter bevat
+            if (commentDto.getContent() == null || commentDto.getContent().trim().isEmpty()) {
+                CommentDto errorComment = new CommentDto();
+                errorComment.setContent("Comment moet minimaal 1 karakter bevatten");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorComment);
+            }
+
+            CommentDto addedComment = commentService.addComment(id, commentDto.getContent(), user);
+            return ResponseEntity.ok(addedComment);
+        } catch (Exception e) {
+            e.printStackTrace(); // Dit helpt bij het afvangen van eventuele fouten
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        // Voeg de comment toe
-        CommentDto addedComment = commentService.addComment(id, commentDto.getContent(), user);
-        return ResponseEntity.ok(addedComment);
     }
 
-    // Gebruikers kunnen comments zien
     @GetMapping("/{id}/comments")
     public ResponseEntity<List<CommentDto>> getComments(@PathVariable Long id, Principal principal) {
         User user = userService.getUserByEmail(principal.getName())

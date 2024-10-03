@@ -35,7 +35,6 @@ public class RoleController {
         }
     }
 
-    // Voeg een endpoint toe om de rol van een gebruiker bij te werken
     @PutMapping("/user/{userId}/role")
     public ResponseEntity<User> updateUserRole(@PathVariable Long userId,
                                                @RequestParam String newRoleName) {

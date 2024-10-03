@@ -9,6 +9,5 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByMp3FileId(Long mp3FileId);
-    List<Comment> findByMp3FileIdAndUserId(Long mp3FileId, Long userId);
 }
 

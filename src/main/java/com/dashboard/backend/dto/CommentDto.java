@@ -7,8 +7,6 @@ public class CommentDto {
     private String artistName;
     private Long fileId;
 
-    // Getters en setters
-
     public Long getId() {
         return id;
     }

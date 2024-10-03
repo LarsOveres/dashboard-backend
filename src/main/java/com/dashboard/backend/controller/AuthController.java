@@ -1,7 +1,6 @@
 package com.dashboard.backend.controller;
 
 import com.dashboard.backend.dto.*;
-import com.dashboard.backend.model.User;
 import com.dashboard.backend.security.JwtService;
 import com.dashboard.backend.service.UserService;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,14 +23,12 @@ public class AuthController {
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthController(AuthenticationManager man, JwtService service, UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(AuthenticationManager man, JwtService service, UserService userService) {
         this.authManager = man;
         this.jwtService = service;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")

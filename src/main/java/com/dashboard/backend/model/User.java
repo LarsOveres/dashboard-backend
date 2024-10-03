@@ -1,11 +1,7 @@
 package com.dashboard.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
-import java.util.Optional;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -26,7 +22,6 @@ public class User {
     @JsonIgnore
     private Role role;
 
-    // Constructors
     public User() {
     }
 
@@ -37,7 +32,6 @@ public class User {
         this.role = role;
     }
 
-    // Getters en setters
     public Long getId() {
         return id;
     }

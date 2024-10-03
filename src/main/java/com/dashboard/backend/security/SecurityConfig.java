@@ -52,7 +52,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/{id}/comment").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/files/{id}/comment").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/user/{id}").hasAuthority("ROLE_ADMIN")
+//                                .requestMatchers(HttpMethod.PUT, "/user/{id}/role").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
