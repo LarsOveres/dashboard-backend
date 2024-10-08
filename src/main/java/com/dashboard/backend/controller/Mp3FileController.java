@@ -148,4 +148,10 @@ public class Mp3FileController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteFile(@PathVariable Long id) {
+        mp3FileService.deleteFile(id);
+        return ResponseEntity.ok("Bestand succesvol verwijderd");
+    }
 }

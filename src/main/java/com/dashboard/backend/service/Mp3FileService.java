@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -173,4 +174,19 @@ public class Mp3FileService {
     public List<Mp3File> getFilesByUser(Long userId) {
         return mp3FileRepository.findByUserId(userId);
     }
+
+    public void deleteFile(Long id) {
+        Mp3File file = mp3FileRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Bestand niet gevonden"));
+
+        Path filePath = Path.of(file.getFilePath());
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Kon het bestand niet verwijderen " + filePath, e);
+        }
+
+        mp3FileRepository.delete(file);
+    }
+
 }

@@ -54,6 +54,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/files/{id}/comment").hasAuthority("ROLE_ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/user/{id}").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/files/delete/{id}").hasAuthority("ROLE_ADMIN")
 //                                .requestMatchers(HttpMethod.PUT, "/user/{id}/role").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().authenticated()
                 )
